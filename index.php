@@ -29,6 +29,10 @@ spl_autoload_register('autoload');
         font-family: 'Aleo', serif;
         text-align: left;
     }
+    
+    .page.rtl {
+        flex-direction: row-reverse;
+    }
 
     .legende {
         width: 100mm;
@@ -75,14 +79,44 @@ spl_autoload_register('autoload');
         padding: 1.4mm 2mm;
         color: white;
         display: inline-block;
-        margin-bottom: 3mm;
+        margin-bottom: 4mm;
         font-weight: 500;
         font-size: .9rem;
         padding-bottom: 0.4mm;
+        position: relative;
+        padding-left: 11.5mm;
     }
 
+    .round {
+        position: absolute;
+        left: -2mm;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 4px solid #38B6FF;
+        border-radius: 100%;
+        background: white;
+        height: 9mm;
+        width: 9mm;
+        color: #38B6FF;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        padding-top: 4px;
+        padding-right: 2px;
+        padding-left: 2px;
+        font-weight: 600;
+        
+    }
+    
+    
     .duckstyle .concours {
         background: #93D401;
+    }
+    
+    .duckstyle .round {
+        border-color: #93D401;
+        color: #93D401;
     }
 
     .auhtor {
@@ -184,19 +218,19 @@ foreach ($array_legends as $legende) {
     $text_length = strlen($legende->legend);
     
     $replaced = 0;
-    $legend_text = str_replace(
+    $legend_text = trim(str_replace(
         '[QRCODE]',
         '<br /><img src="frame.png" width="80mm" class="qr"/>',
         $legende->legend,
         $replaced
-    );
+    ));
     
     if ($legend_text === '') {
         $legend_text = '( Sans titre )';
     }
     
     $class_legend = '';
-    if ($text_length > 180 || $replaced > 0) {
+    if ($text_length > 182 || $replaced > 0) {
         $class_legend = ' smallest';
     } else if ($text_length > 130) {
         $class_legend = ' smaller';
@@ -210,7 +244,7 @@ foreach ($array_legends as $legende) {
     
     $numbers .= '<div class="legende number">' . $legende->number . ' - ' . $legende->author . ' - ' . $legende->concours . '<br /><img src="' . str_replace(
             ['file/d/', '/view?usp=drivesdk'],
-            ['thumbnail?id=', ''],
+            ['thumbnail?authuser=0&id=', ''],
             $legende->image_link
         ) . ' " class="preview"/></div>';
     
@@ -219,7 +253,8 @@ foreach ($array_legends as $legende) {
         <?php
         $i++;
         ?>
-        <div class="concours">Catégorie : <?= $legende->concours ?></div>
+        <div class="concours"><div class="round"><?= intval($legende->number) ?></div>Catégorie : <?= $legende->concours
+            ?></div>
         <div class="text <?= $class_legend ?>"><?= $legend_text ?></div>
         <div class="auhtor"><?= $legende->author ?></div>
 
@@ -241,7 +276,7 @@ foreach ($array_legends as $legende) {
     if (!($i % 10)) {
         echo '
         </div>
-        <div class="page">
+        <div class="page rtl">
         ' . $numbers . '
         </div>
         <div class="page">';
