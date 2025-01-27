@@ -28,6 +28,7 @@ spl_autoload_register('autoload');
         font-size: 1rem;
         font-family: 'Aleo', serif;
         text-align: left;
+        align-content: flex-start;
     }
     
     .page.rtl {
@@ -35,56 +36,66 @@ spl_autoload_register('autoload');
     }
 
     .legende {
-        width: 100mm;
-        height: 59.9mm;
+        width: 105mm;
+        height: 50mm;
         position: relative;
         box-sizing: border-box;
         padding: 6mm;
-        padding-top: 7mm;
         border-bottom: 1px solid #ccc;
+        padding-bottom: 5mm;
     }
 
     .legende:nth-child(odd) {
         border-right: 1px solid #ccc;
     }
 
-    .legende .text {
+    .legende .title {
         font-weight: bold;
-        padding-right: 22mm;
-        margin-bottom: 3mm;
+        margin-bottom: 2mm;
+        font-size: 1rem;
+        width: 70mm;
+    }
+
+    .legende .text {
+        padding-right: 8mm;
+        margin-bottom: 2mm;
         line-height: 1.4;
+        font-size: .94rem;
     }
 
     .legende .text.small {
-        font-size: .96rem;
-        line-height: 1.2;
-    }
-
-    .legende .text.smaller {
         font-size: .90rem;
         line-height: 1.2;
     }
 
-    .legende .text.smallest {
-        padding-right: 20mm;
-        font-size: .75rem;
+    .legende .text.smaller {
+        font-size: .85rem;
+        line-height: 1.2;
+    }
+
+    .legende .text.smallest, .legende .text.xsmallest {
+        font-size: .7rem;
         line-height: 1.2;
         font-weight: 500;
         margin-bottom: 1mm;
         margin-top: -1mm;
     }
 
+    .legende .text.xsmallest {
+        font-size: .60rem;
+    }
+
     .concours {
         background: #38B6FF;
-        padding: 1.4mm 2mm;
+        padding: 1.4mm 4mm;
         color: white;
         display: inline-block;
         margin-bottom: 4mm;
         font-weight: 500;
-        font-size: .9rem;
+        font-size: .8rem;
         padding-bottom: 0.4mm;
         position: relative;
-        padding-left: 11.5mm;
+        padding-left: 10mm;
     }
 
     .round {
@@ -92,16 +103,16 @@ spl_autoload_register('autoload');
         left: -2mm;
         top: 50%;
         transform: translateY(-50%);
-        border: 4px solid #38B6FF;
+        border: 3px solid #38B6FF;
         border-radius: 100%;
         background: white;
-        height: 9mm;
-        width: 9mm;
+        height: 7mm;
+        width: 7mm;
         color: #38B6FF;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 22px;
+        font-size: 18px;
         padding-top: 4px;
         padding-right: 2px;
         padding-left: 2px;
@@ -110,23 +121,23 @@ spl_autoload_register('autoload');
     }
     
     
-    .duckstyle .concours {
+    .laplusbelle .concours {
         background: #93D401;
     }
     
-    .duckstyle .round {
+    .laplusbelle .round {
         border-color: #93D401;
         color: #93D401;
     }
 
-    .auhtor {
+    .author {
         font-style: italic;
-        font-size: .9rem;
+        font-size: .75rem;
     }
 
     .footer {
         position: absolute;
-        bottom: 6mm;
+        bottom: 4mm;
         left: 6mm;
         right: 5mm;
         display: flex;
@@ -147,19 +158,25 @@ spl_autoload_register('autoload');
 
     .logo-duck {
         position: absolute;
-        top: 4mm;
+        top: 2mm;
         right: 4mm;
-        width: 28mm;
-        opacity: .3;
+        width: 22mm;
+        opacity: .5;
     }
 
     .preview {
         width: auto;
-        max-height: 150px;
+        max-height: 130px;
+        margin-top: 2mm;
     }
 
     .number {
         text-align: center;
+        font-size: .8rem;
+    }
+
+    .duckstyle .printby {
+        opacity: 0;
     }
 </style>
 
@@ -186,9 +203,10 @@ class Legend
     public $concours;
     public $image_link;
     
-    public function __construct($legend, $author, $number, $concours, $image_link)
+    public function __construct($legend, $title, $author, $number, $concours, $image_link)
     {
         $this->legend = $legend;
+        $this->title = $title;
         $this->author = $author;
         $this->number = $number;
         $this->concours = $concours;
@@ -199,7 +217,7 @@ class Legend
 $array_legends = [];
 
 foreach ($sheetData as $datum) {
-    $array_legends[] = new Legend($datum[4], $datum[2], $datum[0], $datum[5], $datum[7]);
+    $array_legends[] = new Legend($datum[5],$datum[4], $datum[2], $datum[0], $datum[6], $datum[7]);
 }
 
 echo '<div class="page">';
@@ -214,27 +232,19 @@ $numbers = '';
 
 foreach ($array_legends as $legende) {
     $class = 'laplusbelle';
-    
-    $text_length = strlen($legende->legend);
-    
-    $replaced = 0;
-    $legend_text = trim(str_replace(
-        '[QRCODE]',
-        '<br /><img src="frame.png" width="80mm" class="qr"/>',
-        $legende->legend,
-        $replaced
-    ));
-    
-    if ($legend_text === '') {
-        $legend_text = '( Sans titre )';
-    }
+
+    $legend_text = trim($legende->legend);
+
+    $text_length = strlen($legend_text.$legende->title);
     
     $class_legend = '';
-    if ($text_length > 182 || $replaced > 0) {
+    if ($text_length > 220) {
+        $class_legend = ' xsmallest';
+    } else if ($text_length > 190) {
         $class_legend = ' smallest';
-    } else if ($text_length > 130) {
+    } else if ($text_length > 140) {
         $class_legend = ' smaller';
-    } else if ($text_length > 120) {
+    } else if ($text_length > 100) {
         $class_legend = ' small';
     }
     
@@ -255,25 +265,25 @@ foreach ($array_legends as $legende) {
         ?>
         <div class="concours"><div class="round"><?= intval($legende->number) ?></div>Catégorie : <?= $legende->concours
             ?></div>
-        <div class="text <?= $class_legend ?>"><?= $legend_text ?></div>
-        <div class="auhtor"><?= $legende->author ?></div>
+        <div class="title"><?= $legende->title ?></div>
+        <div class="text <?= $class_legend ?>"><?= nl2br($legend_text) ?></div>
+        <div class="author"><?= $legende->author ?></div>
 
         <img src="logo-bg-no.png" class="logo-duck"/>
 
         <div class="footer">
             <div>
-                Duck Parapente - Concours photos 2021
+                Duck Parapente - Concours photos 2023
             </div>
 
             <div class="printby">
-                Imprimé par
-                <img src="photoweb.png"/>
+                Imprimé par <?= $legende->concours === DUCKSTYLE ? 'Europrimm' :  '<img src="photoweb.png"/>' ?>
             </div>
         </div>
     </div>
     <?php
     // show img on verso
-    if (!($i % 10)) {
+    if (!($i % 10) || $i == count($array_legends)) {
         echo '
         </div>
         <div class="page rtl">
